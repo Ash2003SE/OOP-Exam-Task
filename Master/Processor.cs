@@ -1,6 +1,9 @@
+using System;
 using System.IO;
 using System.IO.Pipes;
+using System.Linq;
 using System.Threading;
+using System.Collections.Generic;
 using Shared;
 
 public class Processor
@@ -19,38 +22,43 @@ public class Processor
     {
         var t1 = new Thread(() => Listen(pipe1));
         var t2 = new Thread(() => Listen(pipe2));
-
         t1.Start();
         t2.Start();
         t1.Join();
         t2.Join();
-
         DisplayResult();
     }
 
     private void Listen(string pipeName)
     {
         using var server = new NamedPipeServerStream(pipeName, PipeDirection.In);
-        Console.WriteLine($"Waiting for {pipeName}...");
+        Console.WriteLine($"Waiting for '{pipeName}'...");
         server.WaitForConnection();
-
         using var reader = new StreamReader(server);
         var json = reader.ReadLine() ?? "[]";
         var entries = PipeUtils.Deserialize(json);
-
         lock (lockObj)
         {
             allData.AddRange(entries);
         }
-
-        Console.WriteLine($"Received from {pipeName}");
+        Console.WriteLine($"Received from '{pipeName}'.");
     }
 
     private void DisplayResult()
     {
-        foreach (var entry in allData)
-        {
+        var result = allData
+            .GroupBy(x => new { x.FileName, x.Word })
+            .Select(g => new
+            {
+                g.Key.FileName,
+                g.Key.Word,
+                Count = g.Sum(e => e.Count)
+            })
+            .OrderBy(x => x.FileName)
+            .ThenBy(x => x.Word);
+
+        Console.WriteLine("\nConsolidated Word Index:");
+        foreach (var entry in result)
             Console.WriteLine($"{entry.FileName}:{entry.Word}:{entry.Count}");
-        }
     }
 }

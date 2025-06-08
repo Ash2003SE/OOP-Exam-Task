@@ -1,3 +1,4 @@
+﻿using System;
 using System.Diagnostics;
 
 class Program
@@ -10,7 +11,7 @@ class Program
             Console.WriteLine("Provide directory path.");
             return;
         }
-
+        // Pin to core 1 (bitmask=1)
         Process.GetCurrentProcess().ProcessorAffinity = (IntPtr)1;
         var worker = new Worker("agent1", args[0]);
         worker.Run();

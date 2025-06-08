@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\Master",
+    "\\ScannerA",
+    "\\ScannerB",
+    "\\ScannerB\\bin",
+    "\\ScannerB\\bin\\Debug"
+  ],
+  "SelectedNode": "\\ScannerB\\bin\\Debug\\net9.0",
+  "PreviewInSolutionExplorer": false
+}
